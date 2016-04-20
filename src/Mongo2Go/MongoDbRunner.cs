@@ -22,7 +22,7 @@ namespace Mongo2Go
         public State State { get; private set; }
 
         /// <summary>
-        /// Connections tring that should be used to establish a conenction the MongoDB instance
+        /// Connections string that should be used to establish a connection the MongoDB instance
         /// </summary>
         public string ConnectionString { get; private set; }
 
@@ -31,14 +31,14 @@ namespace Mongo2Go
         /// On dispose: kills them and deletes their data directory
         /// </summary>
         /// <remarks>Should be used for integration tests</remarks>
-        public static MongoDbRunner Start()
+        public static MongoDbRunner Start(string dataDirectory = MongoDbDefaults.DataDirectory)
         {
-            return new MongoDbRunner(PortPool.GetInstance, new FileSystem(), new MongoDbProcessStarter());
+            return new MongoDbRunner(PortPool.GetInstance, new FileSystem(), new MongoDbProcessStarter(), dataDirectory);
         }
 
         internal static MongoDbRunner StartUnitTest(IPortPool portPool, IFileSystem fileSystem, IMongoDbProcessStarter processStarter)
         {
-            return new MongoDbRunner(portPool, fileSystem, processStarter);
+            return new MongoDbRunner(portPool, fileSystem, processStarter, MongoDbDefaults.DataDirectory);
         }
 
         /// <summary>
@@ -48,18 +48,18 @@ namespace Mongo2Go
         /// Should be used for local debugging only
         /// WARNING: one single instance on one single machine is not a suitable setup for productive environments!!!
         /// </remarks>
-        public static MongoDbRunner StartForDebugging()
+        public static MongoDbRunner StartForDebugging(string dataDirectory = MongoDbDefaults.DataDirectory)
         {
-            return new MongoDbRunner(new ProcessWatcher(), new PortWatcher(), new FileSystem(), new MongoDbProcessStarter());
+            return new MongoDbRunner(new ProcessWatcher(), new PortWatcher(), new FileSystem(), new MongoDbProcessStarter(), dataDirectory);
         }
 
         internal static MongoDbRunner StartForDebuggingUnitTest(IProcessWatcher processWatcher, IPortWatcher portWatcher, IFileSystem fileSystem, IMongoDbProcessStarter processStarter)
         {
-            return new MongoDbRunner(processWatcher, portWatcher, fileSystem, processStarter);
+            return new MongoDbRunner(processWatcher, portWatcher, fileSystem, processStarter, MongoDbDefaults.DataDirectory);
         }
 
         /// <summary>
-        /// Excutes Mongoimport on the associated MongoDB Instace
+        /// Executes Mongoimport on the associated MongoDB Instace
         /// </summary>
         public void Import(string database, string collection, string inputFile, bool drop)
         {
@@ -67,7 +67,7 @@ namespace Mongo2Go
         }
 
         /// <summary>
-        /// Excutes Mongoexport on the associated MongoDB Instace
+        /// Executes Mongoexport on the associated MongoDB Instace
         /// </summary>
         public void Export(string database, string collection, string outputFile)
         {
@@ -77,7 +77,7 @@ namespace Mongo2Go
         /// <summary>
         /// usage: local debugging
         /// </summary>
-        private MongoDbRunner(IProcessWatcher processWatcher, IPortWatcher portWatcher, IFileSystem fileSystem, IMongoDbProcessStarter processStarter)
+        private MongoDbRunner(IProcessWatcher processWatcher, IPortWatcher portWatcher, IFileSystem fileSystem, IMongoDbProcessStarter processStarter, string dataDirectory)
         {
             _fileSystem = fileSystem;
             _port = MongoDbDefaults.DefaultPort;
@@ -95,9 +95,9 @@ namespace Mongo2Go
                 throw new MongoDbPortAlreadyTakenException("MongoDB can't be started. The TCP port {0} is already taken.".Formatted(_port));
             }
 
-            _fileSystem.CreateFolder(MongoDbDefaults.DataDirectory);
-            _fileSystem.DeleteFile(@"{0}\{1}".Formatted(MongoDbDefaults.DataDirectory, MongoDbDefaults.Lockfile));
-            _mongoDbProcess = processStarter.Start(BinariesDirectory, MongoDbDefaults.DataDirectory, _port, true);
+            _fileSystem.CreateFolder(dataDirectory);
+            _fileSystem.DeleteFile(@"{0}\{1}".Formatted(dataDirectory, MongoDbDefaults.Lockfile));
+            _mongoDbProcess = processStarter.Start(BinariesDirectory, dataDirectory, _port, true);
 
             State = State.Running;
         }
@@ -105,14 +105,14 @@ namespace Mongo2Go
         /// <summary>
         /// usage: integration tests
         /// </summary>
-        private MongoDbRunner(IPortPool portPool, IFileSystem fileSystem, IMongoDbProcessStarter processStarter)
+        private MongoDbRunner(IPortPool portPool, IFileSystem fileSystem, IMongoDbProcessStarter processStarter, string dataDirectory)
         {
             _fileSystem = fileSystem;
             _port = portPool.GetNextOpenPort();
 
             ConnectionString = "mongodb://localhost:{0}/".Formatted(_port);
 
-            _dataDirectoryWithPort = "{0}_{1}".Formatted(MongoDbDefaults.DataDirectory, _port);
+            _dataDirectoryWithPort = "{0}_{1}".Formatted(dataDirectory, _port);
             _fileSystem.CreateFolder(_dataDirectoryWithPort);
             _fileSystem.DeleteFile(@"{0}\{1}".Formatted(_dataDirectoryWithPort, MongoDbDefaults.Lockfile));
             _mongoDbProcess = processStarter.Start(BinariesDirectory, _dataDirectoryWithPort, _port);

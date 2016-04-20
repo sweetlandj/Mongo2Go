@@ -1,10 +1,10 @@
 Mongo2Go - MongoDB for integration tests & local debugging
 ========
 
-![Logo](https://raw.github.com/JohannesHoppe/Mongo2Go/master/src/mongo2go_200_200.png)
+![Logo](src/mongo2go_200_200.png)
 
 Mongo2Go is a manged wrapper around the latest MongoDB binaries. It targets **.NET 3.5** and works in later versions, too.  
-This Nuget package contains the executables of _mongo**d**_, _mongoimport_ and _mongoexport_ v2.2.0 (32bit).
+This Nuget package contains the executables of _mongo**d**_, _mongoimport_ and _mongoexport_ **v3.0.10** (32bit).
 
 Mongo2Go has two use cases:
 
@@ -24,9 +24,9 @@ the wrapped MongoDB process will be killed and all data in the data directory wi
 Local debugging
 ------------------------
 In this mode a single MongoDB instance will be started on the default port (27017).
-No data will be deleted and the MongoDB instance won’t be killed automatically.
-Multiple calls to **MongoDbRunner.StartForDebugging()** will return an instance with the State “AlreadyRunning”.
-You can ignore the IDisposable interface, as it won’t have any effect.
+No data will be deleted and the MongoDB instance wonâ€™t be killed automatically.
+Multiple calls to **MongoDbRunner.StartForDebugging()** will return an instance with the State â€œAlreadyRunningâ€.
+You can ignore the IDisposable interface, as it wonâ€™t have any effect.
 **I highly recommend to not use this mode on productive machines!**
 Here you should set up a MongoDB as it is described in the manual.
 For you convenience the MongoDbRunner also exposes _mongoexport_ and _mongoimport_
@@ -37,7 +37,7 @@ Installation
 --------------
 The Mongo2Go Nuget package can be found at [https://nuget.org/packages/Mongo2Go/](https://nuget.org/packages/Mongo2Go/)
 
-Search for „Mongo2Go“ in the Manage NuGet Packages dialog box or run:
+Search for â€žMongo2Goâ€œ in the Manage NuGet Packages dialog box or run:
 
     PM> Install-Package Mongo2Go
 
@@ -127,3 +127,50 @@ public class WebApiApplication : System.Web.HttpApplication
     }
 }
 ```
+
+Changelog
+-------------------------------------
+### Mongo2Go 0.1.8, March 13 2016
+* includes mongod, mongoimport and mongoexport v3.0.10 (32bit)
+* MongoDB is updated to version 3.0.10
+* changes from pull request [#5](https://github.com/JohannesHoppe/Mongo2Go/pull/5), thanks to [Aristarkh Zagorodnikov](https://github.com/onyxmaster)
+
+### Mongo2Go 0.1.6, July 21 2015
+* includes mongod, mongoimport and mongoexport v3.0.4 (32bit)
+* MongoDB is updated to version 3.0.4
+* bug fix [#4](https://github.com/JohannesHoppe/Mongo2Go/issues/4):  
+Sometimes the runner tries to delete the database directory before the mongod process has been stopped, this throws an IOException. 
+Now the runner waits until the mongod process has been stopped before the database directory will be deleted.  
+* Thanks [Sergey Zwezdin](https://github.com/sergun)
+
+### Mongo2Go 0.1.5, July 08 2015
+* includes mongod, mongoimport and mongoexport v2.6.6 (32bit)
+* changes from pull request [#3](https://github.com/JohannesHoppe/Mongo2Go/pull/3)
+* new: `Start` and `StartForDebugging` methods accept an optional parameter to specify a different data directory (default is "C:\data\db")
+* many thanks to [Marc](https://github.com/Silv3rcircl3)
+
+### Mongo2Go 0.1.4, January 26 2015
+* includes mongod, mongoimport and mongoexport v2.6.6 (32bit)
+* changes from pull request [#2](https://github.com/JohannesHoppe/Mongo2Go/pull/2)
+* internal updates for testing the package (not part of the release)
+    * updated MSpec package so that it would work with the latest VS and R# test runner
+    * updated Mongo C# Driver, Fluent Assertions, and Moq packages to latest versions
+    * fixed date handling for mongoimport and mongoexport to pass tests
+* many thanks to [Jesse Sweetland](https://github.com/sweetlandj) 
+
+### Mongo2Go 0.1.3, September 20 2012
+* includes mongod, mongoimport and mongoexport v2.2.0 (32bit)
+
+### Mongo2Go 0.1.2, August 20 2012
+* stable version
+* includes mongod, mongoimport and mongoexport v2.2.0-rc1 (32bit)
+
+### Mongo2Go 0.1.1, August 16 2012
+* second alpha version
+* includes mongod, mongoimport and mongoexport v2.2.0-rc1 (32bit)
+
+
+### Mongo2Go 0.1.0, August 15 2012
+* first alpha version
+* includes mongod, mongoimport and mongoexport v2.2.0-rc1 (32bit)
+
